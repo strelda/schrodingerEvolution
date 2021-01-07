@@ -1,0 +1,1 @@
+julia zapocet.jl ; ./imagesToVideo ; eog autoCorrelation.jpeg ; mpv schrodinger.mp4
