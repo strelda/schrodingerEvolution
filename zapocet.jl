@@ -1,9 +1,9 @@
 print("precompiling libraries...")
-using PlotlyJS #it's heavy, I know...did it for the fun of learning with it
+using PlotlyJS #it's heavy, I know...just wanted to learn with it
 using ProgressBars
 println("done")
 
-#edited thomas algorithm for matrix inversion, complexity O(n), numerically stable for bigger than the rest of the matrix
+#edited thomas algorithm for matrix inversion, complexity O(n), numerically stable if diagonal elements are bigger than the rest of the matrix
 function thomasUni(a::ComplexF64, b::Vector{ComplexF64}, d::Vector{ComplexF64}, n::Int64)
   x = copy(d)
   cp = Array{ComplexF64}(undef,n)
@@ -37,7 +37,6 @@ function braket(P::Vector{ComplexF64},P0::Vector{ComplexF64},h::Float64) #only f
 end
 
 function plotCompare(y::Vector{Float64}, yE::Vector{Float64})
-
   p1 = scatter(;y=y, mode="lines", name="ψ(t)")
   p2 = scatter(; y=yE, mode="lines", name="ψ(t) exact")
   p12() = plot([p1,p2])
@@ -56,12 +55,12 @@ const σ=0.5
 const p0=0
 const x0=-5
 
-#quality
-const n=10000
+#quality, reasonable are: {10000,60,1e-2,50}, {10000,1000,1e-2,500}
+const n=500
 const scale=60 #scale up to fit the wave on the screen
 const dt=1e-2
+const tExact=10
 const h=-2*x0/n #centralizes the potential
-const tExact=50
 const iter = round(Int64,tExact/dt)
 
 #exact solution
@@ -87,12 +86,14 @@ end
 b = (1/(μ*h^2) .+ v)/scale^2
 a = -1/(2μ*h^2*scale^2)
 
-autocor = Array{ComplexF64}(undef,iter)
 
 #initial conditions
 ψ = ψ0
 K = 0.5*im*dt
 z = Vector{ComplexF64}(undef,n)
+
+autocor = Array{ComplexF64}(undef,iter)
+diffMiddle = Array{ComplexF64}(undef,iter)
 
 
 for tim in ProgressBar(1:iter)
@@ -118,20 +119,27 @@ for tim in ProgressBar(1:iter)
     savefig(plotCompare(real.(ψ),real.(exactψgrid)), "plots/schrodinger"*lpad(count,4,"0")*".jpeg")
 
   end
-  autocor[tim] = braket(ψ, ψ0, h)
+
+  global autocor[tim] = braket(ψ, ψ0, h)
 end
 
 
 
+pAutocor = scatter(;x=range(1,length=iter),y=real.(autocor), mode="lines", name="Autocorrelation function ℜ")
+pAutocorIm = scatter(;x=range(1,length=iter),y=imag.(autocor), mode="lines", name="Autocorrelation function ℑ")
+
+pAuto() = plot([pAutocor, pAutocorIm])
+savefig(pAuto(), "autoCorrelation.jpeg")
+
+
+
+diffMiddle = real(ψ0[Int(n/2)-ψ[Int(n/2)])
+open("errorDeltat.txt", "a") do io
+  println(io, diffMiddle )
+end   
+
 # pp1=plot(real.(ψ0), name="ψ(t=0)")
 # pp2=plot(v, name="potential v")
-
-# pAutocor = scatter(;x=range(1,length=iter),y=real.(autocor), mode="lines", name="Autocorrelation function ℜ")
-# pAutocorIm = scatter(;x=range(1,length=iter),y=imag.(autocor), mode="lines", name="Autocorrelation function ℑ")
-# pAuto() = plot([pAutocor, pAutocorIm])
-
-# savefig(pAuto(), "autoCorrelation.jpeg")
-
 # for i in 1:n
 #   x=scale*(x0+i*h)
 #   global exactψgrid[i]=exactψ(x,50.) 
