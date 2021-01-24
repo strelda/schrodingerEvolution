@@ -1,1 +1,1 @@
-ffmpeg -i plots/schrodinger%04d.jpeg -vcodec libx264  schrodinger.mp4
+ffmpeg -i plots/schrodinger%04d.jpeg -vcodec libx264  schrodinger.mp4 -y

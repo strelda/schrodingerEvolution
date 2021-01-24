@@ -1,5 +1,5 @@
 print("precompiling libraries...")
-using PlotlyJS #it's heavy, I know...just wanted to learn with it
+using PlotlyJS #it's heavy, I just wanted to learn with it
 using ProgressBars
 println("done")
 
@@ -56,23 +56,23 @@ const p0=0
 const x0=-5
 
 #quality, reasonable are: {10000,60,1e-2,50}, {10000,1000,1e-2,500}
-const n=500
-const scale=60 #scale up to fit the wave on the screen
+const n=100000
+const scale=500 #scale up to fit the wave on the screen
 const dt=1e-2
-const tExact=10
+const tExact=2000
 const h=-2*x0/n #centralizes the potential
-const iter = round(Int64,tExact/dt)
+const iter = round(Int,tExact/dt)
 
 #exact solution
-X(t::Float64)  = p0*t/μ
-Σ2(t::Float64) = σ*σ + t*t/(4μ*μ*σ*σ)
-φ(x::Float64,t::Float64)= p0*(x-X(t)) + p0*p0*t/(2μ) + t*(x-X(t))^2/(8*μ*σ*σ*Σ2(t)) + angle(1/sqrt(μ+im*t/(2σ*σ)))
-exactψ(x::Float64,t::Float64)= (2π*Σ2(t))^(-1/4) * exp( -(x-X(t))^2/(4*Σ2(t)) +im* φ(x,t))
+const X(t::Float64)  = p0*t/μ
+const Σ2(t::Float64) = σ*σ + t*t/(4μ*μ*σ*σ)
+const φ(x::Float64,t::Float64)= p0*(x-X(t)) + p0*p0*t/(2μ) + t*(x-X(t))^2/(8*μ*σ*σ*Σ2(t)) + angle(1/sqrt(μ+im*t/(2σ*σ)))
+const exactψ(x::Float64,t::Float64)= (2π*Σ2(t))^(-1/4) * exp( -(x-X(t))^2/(4*Σ2(t)) +im* φ(x,t))
 exactψgrid = Array{ComplexF64}(undef,n)
 
 
 #functions for approximate solution
-V(x::Float64) = 0.5*μ*ω*ω*x*x
+const V(x::Float64) = 0.5*μ*ω*ω*x*x
 v  = Vector{Float64}(undef,n)
 ψ0 = Vector{ComplexF64}(undef,n)
 
@@ -83,19 +83,18 @@ for i in 1:n
 end
 
 #b is diagonal of tridiagonal matrix H, a are all offdiagonal elements
-b = (1/(μ*h^2) .+ v)/scale^2
-a = -1/(2μ*h^2*scale^2)
+const b = (1/(μ*h^2) .+ v)/scale^2
+const a = -1/(2μ*h^2*scale^2)
 
 
 #initial conditions
 ψ = ψ0
-K = 0.5*im*dt
 z = Vector{ComplexF64}(undef,n)
 
+const K = 0.5*im*dt
 autocor = Array{ComplexF64}(undef,iter)
-diffMiddle = Array{ComplexF64}(undef,iter)
 
-
+cnt=0
 for tim in ProgressBar(1:iter)
   global ψ, z
   ψ[1]=0
@@ -109,15 +108,14 @@ for tim in ProgressBar(1:iter)
   z[n] = ψ[n] - K*(a*ψ[n-1] + a*ψ[n])
   ψ = thomasUni(K*a,1 .+ K*b,z,n) # = inv(Id+0.5*im*dt*H)*z
   
+  
   if mod(tim,round(Int,iter/100))==0
-
     for i in 1:n
       x=scale*(x0+i*h)
       global exactψgrid[i]=exactψ(x,tim*dt)
-    end
-
-    savefig(plotCompare(real.(ψ),real.(exactψgrid)), "plots/schrodinger"*lpad(count,4,"0")*".jpeg")
-
+    end  
+    savefig(plotCompare(real.(ψ),real.(exactψgrid)), "plots/schrodinger"*lpad(cnt,4,"0")*".jpeg")
+    global cnt += 1
   end
 
   global autocor[tim] = braket(ψ, ψ0, h)
@@ -131,11 +129,16 @@ pAutocorIm = scatter(;x=range(1,length=iter),y=imag.(autocor), mode="lines", nam
 pAuto() = plot([pAutocor, pAutocorIm])
 savefig(pAuto(), "autoCorrelation.jpeg")
 
+for i in 1:n
+  x=scale*(x0+i*h)
+  global exactψgrid[i]=exactψ(x,iter*dt)
+end
+plotCompare(real.(ψ),real.(exactψgrid))
+diff = ψ-exactψgrid
+intDiff = real(braket(diff,diff,h))
 
-
-diffMiddle = real(ψ0[Int(n/2)-ψ[Int(n/2)])
 open("errorDeltat.txt", "a") do io
-  println(io, diffMiddle )
+  println(io, intDiff )
 end   
 
 # pp1=plot(real.(ψ0), name="ψ(t=0)")
