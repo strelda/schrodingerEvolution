@@ -20,31 +20,31 @@ Tyto chyby se při konstantním *n* snižují, o 4 řády s každým řádem zme
 *<ψ|ψ0>* je obecně komplexní funkce, která je v případě volné částice periodická. Perioda je v případě dt=1e-2 přibližně 23 časových kroků, tedy 23*dt=0.23. 
 
 Autokorelační funkce:
-![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/eigen_autocorrelation.jpeg?raw=true "Autokorelační funkce")
+![Img](https://github.com/strelda/schrodingerEvolution/blob/main/images/eigen_autocorrelation.jpeg?raw=true "Autokorelační funkce")
 
 
 ##Gaussovský balík
 Vývoj Gaussovského balíku je silně ovlivněn okrajovými podmínkami a nepomůže ani jejich fixování na nulu. Je tedy nutné nastavit dostatečně velkou škálu *scale*. 
 
 Počáteční stav gaussovského balíku
-![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_initial.jpeg?raw=true "Autokorelační funkce")
+![Img](https://github.com/strelda/schrodingerEvolution/blob/main/images/gauss_initial.jpeg?raw=true "Autokorelační funkce")
 
 
 se po čase 30 iteracích vyvine do stavu 
-![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_10000_20_1e-1_30_frame30.jpeg?raw=true "Autokorelační funkce"),
+![Img](https://github.com/strelda/schrodingerEvolution/blob/main/images/gauss_10000_20_1e-1_30_frame30.jpeg?raw=true "Autokorelační funkce"),
 kde lze opět pozorovat mírné odchýlení od přesného řešení, jelikož výpočet byl proveden s nízkými parametry *n=1000*, *dt=1e-1*.
 
 V případě rozplývajícího se Gaussovského balíku není autokorelační funkce periodickou funkcí, ale vypadá
-![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_autocorrelation.jpeg?raw=true "Autokorelační funkce")
+![Img](https://github.com/strelda/schrodingerEvolution/blob/main/images/gauss_autocorrelation.jpeg?raw=true "Autokorelační funkce")
 
 Přejdeme-li však z testovacího módu (tedy *testingMode=1* v schrod.jl),čímž zapneme kvadratický potenciál, dostaneme např pro parametry *n=5000*, *dt=1e-2*, *scale=10* a čas *tExact=10* časový vývoj, viz **videos/gaussInPotential.mp4**. Autokorelační funkce pak bude
-![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_autocorrelationPotential.jpeg?raw=true "Autokorelační funkce")
+![Img](https://github.com/strelda/schrodingerEvolution/blob/main/images/gauss_autocorrelationPotential.jpeg?raw=true "Autokorelační funkce")
 
 Perioda autokorelační funkce je v tomto případě přibližně 833 snímků, tedy *Δt≈8.33* s.
 
 ####Závislost autokorelační funkce na parametrech
 Pro jiné hodnoty, než *μ=1*, např *μ=4* viz obrázek můžeme pozorovat několik period modulovaných do jedné vlny
-![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_autocorrelation_μ4.jpeg?raw=true "Autokorelační funkce")
+![Img](https://github.com/strelda/schrodingerEvolution/blob/main/images/gauss_autocorrelation_μ4.jpeg?raw=true "Autokorelační funkce")
 avšak největší perioda funkce se nemění.
 
 Parametru *ω* je frekvence úměrná, na parametru *σ* nezávisí, hybnost *p* způsobí přebíhání částice v potenciálovém údolí, tedy kvůli přidané komplexitě pohybu periodu zvětší, viz **videos/pingpong.mp4** pro *p=1*. 
