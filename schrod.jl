@@ -61,7 +61,7 @@ function plotCompareReIm(yR::Vector{Float64}, yI::Vector{Float64})
 end
 
 
-#some constants default: 2, 1.5, 0.5, 0, -5
+#some constants default: 1, 1.5, 0.5, 0, -5
 const μ=1
 const ω=1.5
 const σ=0.5
@@ -69,9 +69,9 @@ const p0=0
 const x0=-5
 
 #quality, reasonable are: {10000,60,1e-2,50}, {10000,1000,1e-2,500}
-const n=5000
-const scale=10 #scale up to fit the wave on the screen
-const dt=1e-2
+const n=1000
+const scale=5 #scale up to fit the wave on the screen
+const dt=1e-1
 const tExact=10
 const h=-2*x0/n #centralizes the potential for gauss
 const iter = round(Int,tExact/dt)
