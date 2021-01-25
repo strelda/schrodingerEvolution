@@ -8,7 +8,7 @@ schrod.jl na požádání spočte časový vývoj volné částice, či rozplýv
 
 
 ## Volná částice
-Na obrázku images/eigen_initial.jpeg vidíme počáteční stav vlnové funkce s parametry *scale=30*, *k=0.1*. Pro energii částice En=5 a přesnost výpočtu danou n=500, dt=5e-5 která dostaneme v čase tExact=10 výsledek zobrazený na obrázku images/eigen_500_30_5e-2_10_k0.1_E5.jpeg.
+Na obrázku images/eigen_initial.jpeg vidíme počáteční stav vlnové funkce s parametry *scale=30*, *k=0.1*. Pro energii částice En=5 a přesnost výpočtu danou n=500, dt=5e-5 která dostaneme v čase tExact=10 výsledek zobrazený na obrázku ![img](https://github.com/strelda/schrodingerEvolution/blob/main/images/eigen_500_30_5e-2_10_k0.1_E5.jpeg?raw=true "eigen").
 
 Časový vývoj je srovnán ve videích schrodinger_t=... .mp4 pro časové kroky *dt=t=1e-1* a *5e-2*. Pro *dt=1e-2* nebyl již rozdíl v daném čase t*Exact* pozorovatelný.
 
