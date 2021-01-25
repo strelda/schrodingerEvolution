@@ -8,22 +8,36 @@ schrod.jl na požádání spočte časový vývoj volné částice, či rozplýv
 
 
 ## Volná částice
-Na obrázku images/eigen_initial.jpeg vidíme počáteční stav vlnové funkce s parametry *scale=30*, *k=0.1*. Pro energii částice En=5 a přesnost výpočtu danou n=500, dt=5e-5 která dostaneme v čase tExact=10 výsledek zobrazený na obrázku ![img](https://github.com/strelda/schrodingerEvolution/blob/main/images/eigen_500_30_5e-2_10_k0.1_E5.jpeg?raw=true "eigen").
+Na následujícím obrázku vidíme počáteční stav vlnové funkce s parametry *scale=30*, *k=0.1*. ![img](https://github.com/strelda/schrodingerEvolution/blob/main/images/eigen_initial.jpeg?raw=true "vlastní stav")
 
-Časový vývoj je srovnán ve videích schrodinger_t=... .mp4 pro časové kroky *dt=t=1e-1* a *5e-2*. Pro *dt=1e-2* nebyl již rozdíl v daném čase t*Exact* pozorovatelný.
+Pro energii částice En=5 a přesnost výpočtu danou n=500, dt=5e-5 dostaneme v čase tExact=10 ![img](https://github.com/strelda/schrodingerEvolution/blob/main/images/eigen_500_30_5e-2_10_k0.1_E5.jpeg?raw=true "vlastní stav 1").
+
+Časový vývoj je srovnán ve videích eigen_t=... .mp4 pro časové kroky *dt=t=1e-1* a *5e-2*. Pro *dt=1e-2* nebyl již rozdíl v daném čase *tExact* pozorovatelný.
 
 Zvyšování přesnosti výpočtu lze ilustrovat na několika hodnotách, které program automaticky ukládá do souboru intDiff. Tato chyba je počítaná, jako <ψ-ψexact|ψ-ψexact>, ze kterého je navíc vynechaná rozumně velká oblast kolem krajů tak, aby braket nebyl ovlivněn okrajovými nepřesnostmi.
 Tyto chyby se při konstantním *n* snižují, o 4 řády s každým řádem zmenšení *dt*. Tedy jednodimenzionální chyba *ψ-ψexact|<sub>x;</sub>* je skutečně úměrná *dt^2*. 
 
-*<ψ|ψ0>* je obecně komplexní funkce, která je v případě volné částice periodická. Perioda je v případě dt=1e-2 přibližně 23 časových kroků, tedy 23*dt=1e-2
-![Alt text](images/eigen_autoCorrelation.jpeg?raw=true "Autokorelační funkce")
+*<ψ|ψ0>* je obecně komplexní funkce, která je v případě volné částice periodická. Perioda je v případě dt=1e-2 přibližně 23 časových kroků, tedy 23*dt=0.23. 
+
+Autokorelační funkce:
+![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/eigen_autocorrelation.jpeg?raw=true "Autokorelační funkce")
 
 
 ##Gaussovský balík
 Vývoj Gaussovského balíku je silně ovlivněn okrajovými podmínkami a nepomůže ani jejich fixování na nulu. Je tedy nutné nastavit dostatečně velkou škálu *scale*. 
 
-Na obrázku images/gauss_initial.jpeg vidíme počáteční stav gaussovského balíku. Po čase *tExact=50* je tento stav vyvinut do stavu images/gauss_1000_60_1e-2_50.jpeg.
+Počáteční stav gaussovského balíku
+![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_initial.jpeg?raw=true "Autokorelační funkce")
 
-V případě Gaussovského balíku není autokorelační funkce periodickou funkcí, ale opět ji můžeme vykreslit, viz images/gauss_autoCorrelation.jpeg.
 
-Zajímavé je pozorovat překmitávání vln na kraji Gaussovského balíku patrné např. z <ψ-ψexact|ψ-ψexact>.
+se po čase 30 iteracích vyvine do stavu 
+![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_10000_20_1e-1_30_frame30.jpeg?raw=true "Autokorelační funkce"),
+kde lze opět pozorovat mírné odchýlení od přesného řešení, jelikož výpočet byl proveden s nízkými parametry *n=1000*, *dt=1e-1*.
+
+V případě rozplývajícího se Gaussovského balíku není autokorelační funkce periodickou funkcí, ale vypadá
+![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_autocorrelation.jpeg?raw=true "Autokorelační funkce")
+
+Přejdeme-li však z testovacího módu (tedy *testingMode=1* v schrod.jl),čímž zapneme kvadratický potenciál, dostaneme např pro parametry *n=5000*, *dt=1e-2* a čas *tExact=30* časový vývoj, viz *gaussInPotential.mp4*. Autokorelační funkce pak bude
+![Alt text](https://github.com/strelda/schrodingerEvolution/tree/main/images/gauss_autocorrelationPotential.jpeg?raw=true "Autokorelační funkce")
+
+Perioda autokorelační funkce je v tomto případě přibližně 833 snímků, tedy *Δt≈8.33* s.

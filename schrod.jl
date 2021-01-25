@@ -5,6 +5,8 @@ println("done")
 
 #0 for free particle, 1 for Gaussian
 const switch=1
+#if you just want to compare Gaussian without the potential, set testingMode=0
+const testingMode=0
 
 #edited thomas algorithm for matrix inversion, complexity O(n), numerically stable if diagonal elements are bigger than the rest of the matrix
 function thomasUni(a::ComplexF64, b::Vector{ComplexF64}, d::Vector{ComplexF64}, n::Int64)
@@ -50,8 +52,16 @@ function plotCompare(y::Vector{Float64}, yE::Vector{Float64})
   return [p12(),we()]
 end
 
+function plotCompareReIm(yR::Vector{Float64}, yI::Vector{Float64})
+  p1 = scatter(;y=yR, mode="lines", name="ℜ ψ(t)")
+  p2 = scatter(; y=yI, mode="lines", name="ℑ ψ(t)")
+  p12() = plot([p1,p2])
 
-#some constants
+  return [p12()]
+end
+
+
+#some constants default: 2, 1.5, 0.5, 0, -5
 const μ=1
 const ω=1.5
 const σ=0.5
@@ -59,9 +69,9 @@ const p0=0
 const x0=-5
 
 #quality, reasonable are: {10000,60,1e-2,50}, {10000,1000,1e-2,500}
-const n=1000
-const scale=30 #scale up to fit the wave on the screen
-const dt=1e-1
+const n=5000
+const scale=10 #scale up to fit the wave on the screen
+const dt=1e-2
 const tExact=10
 const h=-2*x0/n #centralizes the potential for gauss
 const iter = round(Int,tExact/dt)
@@ -99,13 +109,13 @@ exactψgrid = Array{ComplexF64}(undef,n)
 
 if switch==0
   #eigen
+  b = Array{ComplexF64}(undef,n)
+  const a = 0
   for i in 1:n
     x=scale*(x0+i*h)
     ψ0eigen[i] = exp(im*k*x)
     b[i] = En
   end
-  const a = 0
-  b = Array{ComplexF64}(undef,n)
   ψ = copy(ψ0eigen)
   const ψ0= copy(ψ0eigen)
   exactψ = exactψeigen
@@ -113,11 +123,15 @@ else
   #gauss
   for i in 1:n
     x=scale*(x0+i*h)
-    v[i]=V(x)
+    if testingMode==1
+      v[i]=0
+    else
+      v[i]=V(x)
+    end 
     ψ0gauss[i] = (2π*σ*σ)^(-1/4)*exp(-x*x/(4σ*σ) + im*p0*x)
   end
   const a = -1/(2μ*h^2*scale^2)
-  const b = (1/(μ*h^2) .+ v)/scale^2
+  const b = 1/(μ*h^2)/scale^2 .+ v
   ψ = copy(ψ0gauss)
   const ψ0= copy(ψ0gauss)
   exactψ = exactψgauss
@@ -141,36 +155,42 @@ for tim in ProgressBar(1:iter)
   z[n] = ψ[n] - K*(a*ψ[n-1] + a*ψ[n])
   ψ = thomasUni(K*a,1 .+ K*b,z,n) # = inv(Id+0.5*im*dt*H)*z
   
-  
   if mod(tim,round(Int,iter/100))==0
     for i in 1:n
       x=scale*(x0+i*h)
       global exactψgrid[i]=exactψ(x,tim*dt)
     end  
-    savefig(plotCompare(real.(ψ),real.(exactψgrid)), "plots/schrodinger"*lpad(cnt,4,"0")*".jpeg")
-    global cnt += 1
+    if testingMode==1
+      savefig(plotCompare(real.(ψ),real.(exactψgrid)), "plots/schrodinger"*lpad(cnt,4,"0")*".jpeg")
+    else
+      savefig(plotCompareReIm(real.(ψ),imag.(ψ)), "plots/schrodinger"*lpad(cnt,4,"0")*".jpeg")
+    end
+      global cnt += 1
   end
 
   global autocor[tim] = braket(ψ, ψ0, h)
 end
 
 
-
+#printing autoCorrelation function
 pAutocor = scatter(;x=range(1,length=iter),y=real.(autocor), mode="lines", name="Autocorrelation function ℜ")
 pAutocorIm = scatter(;x=range(1,length=iter),y=imag.(autocor), mode="lines", name="Autocorrelation function ℑ")
 
 pAuto() = plot([pAutocor, pAutocorIm])
 savefig(pAuto(), "autoCorrelation.jpeg")
 
-for i in 1:n
-  x=scale*(x0+i*h)
-  global exactψgrid[i]=exactψ(x,iter*dt)
+#printing integral error, just for testing
+if testingMode==1
+  for i in 1:n
+    x=scale*(x0+i*h)
+    global exactψgrid[i]=exactψ(x,iter*dt)
+  end
+  plotCompare(real.(ψ),real.(exactψgrid))
+
+  diff = (ψ-exactψgrid)[200:end-200]
+  intDiff = real(braket(diff,diff,h))
+
+  open("intDiff", "a") do io
+    println(io, intDiff )
+  end   
 end
-plotCompare(real.(ψ),real.(exactψgrid))
-diff = (ψ-exactψgrid)[200:end-200]
-intDiff = real(braket(diff,diff,h))
-
-open("intDiff", "a") do io
-  println(io, intDiff )
-end   
-
