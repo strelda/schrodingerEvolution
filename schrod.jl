@@ -3,6 +3,9 @@ using PlotlyJS #it's heavy, I just wanted to learn with it
 using ProgressBars
 println("done")
 
+#0 for free particle, 1 for Gaussian
+const switch=1
+
 #edited thomas algorithm for matrix inversion, complexity O(n), numerically stable if diagonal elements are bigger than the rest of the matrix
 function thomasUni(a::ComplexF64, b::Vector{ComplexF64}, d::Vector{ComplexF64}, n::Int64)
   x = copy(d)
@@ -56,12 +59,12 @@ const p0=0
 const x0=-5
 
 #quality, reasonable are: {10000,60,1e-2,50}, {10000,1000,1e-2,500}
-n=500
-scale=30 #scale up to fit the wave on the screen
-dt=1e-1
-tExact=10
-h=-2*x0/n #centralizes the potential for gauss
-iter = round(Int,tExact/dt)
+const n=1000
+const scale=30 #scale up to fit the wave on the screen
+const dt=1e-1
+const tExact=10
+const h=-2*x0/n #centralizes the potential for gauss
+const iter = round(Int,tExact/dt)
 
 
 
@@ -93,29 +96,32 @@ v  = Vector{Float64}(undef,n)
 z = Vector{ComplexF64}(undef,n)
 exactψgrid = Array{ComplexF64}(undef,n)
 
-#eigen
-const a = 0
-b = Array{ComplexF64}(undef,n)
-for i in 1:n
-  x=scale*(x0+i*h)
-  ψ0eigen[i] = exp(im*k*x)
-  b[i] = En
+
+if switch==0
+  #eigen
+  for i in 1:n
+    x=scale*(x0+i*h)
+    ψ0eigen[i] = exp(im*k*x)
+    b[i] = En
+  end
+  const a = 0
+  b = Array{ComplexF64}(undef,n)
+  ψ = copy(ψ0eigen)
+  const ψ0= copy(ψ0eigen)
+  exactψ = exactψeigen
+else 
+  #gauss
+  for i in 1:n
+    x=scale*(x0+i*h)
+    v[i]=V(x)
+    ψ0gauss[i] = (2π*σ*σ)^(-1/4)*exp(-x*x/(4σ*σ) + im*p0*x)
+  end
+  const a = -1/(2μ*h^2*scale^2)
+  const b = (1/(μ*h^2) .+ v)/scale^2
+  ψ = copy(ψ0gauss)
+  const ψ0= copy(ψ0gauss)
+  exactψ = exactψgauss
 end
-ψ = copy(ψ0eigen)
-const ψ0= copy(ψ0eigen)
-exactψ = exactψeigen
-#gauss
-# a = -1/(2μ*h^2*scale^2)
-# b = (1/(μ*h^2) .+ v)/scale^2
-# for i in 1:n
-#   x=scale*(x0+i*h)
-#   v[i]=V(x)
-#   ψ0gauss[i] = (2π*σ*σ)^(-1/4)*exp(-x*x/(4σ*σ) + im*p0*x)
-# end
-# ψ = copy(ψ0gauss)
-# const ψ0= copy(ψ0gauss)
-# exactψ = exactψgauss
-  
 
 
 ##iteration
@@ -161,32 +167,10 @@ for i in 1:n
   global exactψgrid[i]=exactψ(x,iter*dt)
 end
 plotCompare(real.(ψ),real.(exactψgrid))
-diff = ψ-exactψgrid
+diff = (ψ-exactψgrid)[200:end-200]
 intDiff = real(braket(diff,diff,h))
 
-open("errorDeltat.txt", "a") do io
+open("intDiff", "a") do io
   println(io, intDiff )
 end   
-
-# pp1=plot(real.(ψ0), name="ψ(t=0)")
-# pp2=plot(v, name="potential v")
-# for i in 1:n
-#   x=scale*(x0+i*h)
-#   global exactψgrid[i]=exactψ(x,50.) 
-# end
-
-# y = real.(ψ)
-# yE = real.(exactψgrid)
-
-# p1 = scatter(;y=y, mode="lines", name="ψ(t)")
-# p2 = scatter(; y=yE, mode="lines", name="ψ(t) exact")
-# p12() = plot([p1,p2])
-
-# pErr = scatter(;y=(y-yE)/maximum(yE), mode="lines", name="(ψExact-ψ)/max(ψExact)")
-# we() = plot([pErr])
-
-
-# [p12(),we(),pAuto()]
-
-
 
