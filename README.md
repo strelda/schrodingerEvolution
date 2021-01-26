@@ -16,7 +16,7 @@ Výsledek pro první dva případy je srovnáván s analytickým řešením. Na 
 Čas do kterého budou iterace prováděny je řízen fyzikálním časem *tExact*.
 
 
-#### pomocné skripty
+###### pomocné skripty
 **imagesToVideo** - linux script pro převod obrázkové sekvence na video
 
 **calculateItPlease** - linux script pro spuštění programu schrod.jl až po zobrazení výsledků
